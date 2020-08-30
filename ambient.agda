@@ -25,16 +25,14 @@ data Capability : Set where
   Open : Id → Capability
 
 data Process : Set where
+  ν_∙_   : Id → Process → Process                 -- Restriction
   Stop   : Process                                -- Inactivity
   _||_   : Process → Process → Process            -- Composition
-  !_     : Process -> Process                     -- Repeat
-
-  _[_]   : Capability → Process → Process                 -- Ambient
-  ν_∙_   : Id → Process → Process                 -- Restriction
+  !_     : Process -> Process                     -- Replication
+  _[_]   : Capability → Process → Process         -- Ambient
   _∙_    : Capability → Process → Process         -- Action
-
+  Fun_∙_ : Id -> Process → Process                -- Input Action
   <_>    : Capability → Process                   -- Message
-  Fun_∙_ : Id -> Process → Process                -- Abstraction
 
 -- Capability substitution
 
@@ -75,24 +73,24 @@ Stop [ _ / _ ]       = Stop
 infix 5 _=>_
 
 data _=>_ : Process → Process → Set where
-  RedIn    : ∀ {m n P Q R S} →
-             ` m [ In n ∙ P || Q ] || ` n [ R ] || S
-             =>
-             ` n [ ` m [ P || Q ] || R ] || S
+  Red_In    : ∀ {m n P Q R} →
+              ` m [ In n ∙ P || Q ] || ` n [ R ]
+              =>
+              ` n [ ` m [ P || Q ] || R ]
 
-  RedOut   : ∀ {m n P Q R S} →
-             ` m [ ` n [ Out m ∙ P || R ] || Q ] || S
-             =>
-            ` m [ Q ] || ` n [ P || R ] || S
+  Red_Out   : ∀ {m n P Q R} →
+              ` m [ ` n [ Out m ∙ P || R ] || Q ]
+              =>
+             ` m [ Q ] || ` n [ P || R ]
 
-  RedOpen  : ∀ {m P Q R} →
-             ` m [ P ] || Open m ∙ Q || R
-             =>
-             P || Q || R
+  Red_Open  : ∀ {m P Q} →
+              ` m [ P ] || Open m ∙ Q
+              =>
+              P || Q
 
-  RedApply : ∀ {M x P Q} →
-             < M > || Fun x ∙ P || Q
-             =>
-             P [ x / M ] || Q
+  Red_I/O   : ∀ {M x P} →
+              < M > || Fun x ∙ P
+              =>
+              P [ x / M ]
 
 --- Congruence
