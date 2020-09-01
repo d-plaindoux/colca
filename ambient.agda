@@ -2,7 +2,7 @@ module Ambient where
 
 open import Relation.Nullary using (yes; no)
 open import Data.String using (String; _≟_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
+open import Relation.Binary.PropositionalEquality using (_≢_; refl) renaming (_≡_ to _≡≡_)
 
 -- Basic sorts -----------------------------------------------------------------
 
@@ -34,10 +34,10 @@ C [ _ := _ ]       = C
 
 -- Tests corner
 
-_ : ` "a" [ "a" := Open "b" ] ≡ Open "b"
+_ : ` "a" [ "a" := Open "b" ] ≡≡ Open "b"
 _ = refl
 
-_ : ` "b" [ "a" := Open "b" ] ≡ ` "b"
+_ : ` "b" [ "a" := Open "b" ] ≡≡ ` "b"
 _ = refl
 
 -- Process Definition ----------------------------------------------------------
@@ -76,70 +76,70 @@ Zero [ _ / _ ]       = Zero
 
 -- Tests corner
 
-_ : (` "a" [ < ` "b" > ]) [ "b" / Open "a" ] ≡ ` "a" [ < Open "a" > ]
+_ : (` "a" [ < ` "b" > ]) [ "b" / Open "a" ] ≡≡ ` "a" [ < Open "a" > ]
 _ = refl
 
-_ : (< ` "a" > || < ` "b" >) [ "b" / Open "a" ] ≡ < ` "a" > || < Open "a" >
+_ : (< ` "a" > || < ` "b" >) [ "b" / Open "a" ] ≡≡ < ` "a" > || < Open "a" >
 _ = refl
 
 -- Congruence ------------------------------------------------------------------
 
-infix 5 _≡≡_
+infix 5 _≡_
 
-data _≡≡_ : Process → Process → Set where
+data _≡_ : Process → Process → Set where
   Struct_Refl    : ∀ {P} →
-                   P ≡≡ P
+                   P ≡ P
 
   Struct_Symm    : ∀ {P Q} →
-                   P ≡≡ Q → Q ≡≡ P
+                   P ≡ Q → Q ≡ P
 
   Struct_Trans   : ∀ {P Q R} →
-                   P ≡≡ Q → Q ≡≡ R → P ≡≡ R
+                   P ≡ Q → Q ≡ R → P ≡ R
 
   Struct_Res     : ∀ {n P Q} →
-                   P ≡≡ Q → ν n ∙ P ≡≡ ν n ∙ Q
+                   P ≡ Q → ν n ∙ P ≡ ν n ∙ Q
 
   Struct_Par     : ∀ {P Q R} →
-                   P ≡≡ Q → P || R ≡≡ Q || R
+                   P ≡ Q → P || R ≡ Q || R
 
   Struct_Repl    : ∀ {P Q} →
-                   P ≡≡ Q → ! P ≡≡ ! Q
+                   P ≡ Q → ! P ≡ ! Q
 
   Struct_Amb     : ∀ {M P Q} →
-                   P ≡≡ Q → M [ P ] ≡≡ M [ Q ]
+                   P ≡ Q → M [ P ] ≡ M [ Q ]
 
   Struct_Action  : ∀ {M P Q} →
-                   P ≡≡ Q → M ∙ P ≡≡ M ∙ Q
+                   P ≡ Q → M ∙ P ≡ M ∙ Q
 
   Struct_Input   : ∀ {x P Q} →
-                   P ≡≡ Q → Fun x ∙ P ≡≡ Fun x ∙ Q
+                   P ≡ Q → Fun x ∙ P ≡ Fun x ∙ Q
 
   Struct_Comm    : ∀ {P Q} →
-                   P ≡≡ Q → Q ≡≡ P
+                   P ≡ Q → Q ≡ P
 
   Struct_Assoc   : ∀ {P Q R} →
-                   (P || Q) || R ≡≡ P || (Q || R)
+                   (P || Q) || R ≡ P || (Q || R)
 
   Struct_ResRes  : ∀ {n m P} →
-                   n ≢ m -> ν n ∙ ν m ∙ P ≡≡ ν m ∙ ν n ∙ P
+                   n ≢ m -> ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
 
   -- Struct_ResPar : ∀ {n m P} → ??? -- Free variale computation missing
 
   Struct_ResAmb  : ∀ {n m P} →
-                   n ≢ m -> ν n ∙ (` m [ P ]) ≡≡ ` m [ ν n ∙ P ]
+                   n ≢ m -> ν n ∙ (` m [ P ]) ≡ ` m [ ν n ∙ P ]
 
   Struct_ZeroPar : ∀ {P} →
-                   P || Zero ≡≡ P
+                   P || Zero ≡ P
 
   Struct_ZeroRes : ∀ {n} →
-                   ν n ∙ Zero ≡≡ Zero
+                   ν n ∙ Zero ≡ Zero
 
-  Struct_ZeroRep : ! Zero ≡≡ Zero
+  Struct_ZeroRep : ! Zero ≡ Zero
 
-  Struct_ε       : ε ∙ Zero ≡≡ Zero
+  Struct_ε       : ε ∙ Zero ≡ Zero
 
   Struct_∙       : ∀ {M M' P} →
-                   (M ∙ M') ∙ P ≡≡ M ∙ (M' ∙ P)
+                   (M ∙ M') ∙ P ≡ M ∙ (M' ∙ P)
 
 -- Reduction rules -------------------------------------------------------------
 
@@ -181,8 +181,8 @@ data _~>_ : Process → Process → Set where
               →
               M [ P ] ~> M [ Q ]
 
-  Red_≡≡   : ∀ {P P' Q Q'} →
-             P' ≡≡ P → P ~> Q → Q ≡≡ Q'
+  Red_≡   : ∀ {P P' Q Q'} →
+             P' ≡ P → P ~> Q → Q ≡ Q'
              →
              P' ~> Q'
 
