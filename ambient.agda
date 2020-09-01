@@ -1,8 +1,12 @@
 module Ambient where
 
-open import Relation.Nullary using (yes; no)
-open import Data.String using (String; _≟_)
-open import Relation.Binary.PropositionalEquality using (_≢_; refl) renaming (_≡_ to _≡≡_)
+open import Relation.Nullary
+     using (yes; no)
+open import Data.String
+     using (String; _≟_)
+
+open import Relation.Binary.PropositionalEquality
+     using (_≢_; refl) renaming (_≡_ to _≡≡_)
 
 -- Basic sorts -----------------------------------------------------------------
 
