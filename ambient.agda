@@ -4,23 +4,17 @@ open import Relation.Nullary using (yes; no)
 open import Data.String using (String; _≟_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
--- Basic sorts
+-- Basic sorts -----------------------------------------------------------------
 
 Id : Set
 Id = String
 
--- Capabilities & Processes
+-- Capabilities Definition -----------------------------------------------------
 
-infix  50 Var_
 infix  50 `_
-infix  40 _[_/_]
-infix  30 Fun_∙_
-infixr 20 _[_]
 infixr 15 _∙_
-infixr 10 _||_
 
 data Capability : Set where
-  Var_ : Id → Capability                          -- Variable
   `_   : Id → Capability                          -- Name
   In   : Id → Capability                          -- Can enter
   Out  : Id → Capability                          -- Can exit
@@ -28,9 +22,34 @@ data Capability : Set where
   ε    : Capability                               -- Null
   _∙_  : Capability → Capability → Capability     -- Path
 
+-- Capability substitution -----------------------------------------------------
+
+_[_:=_] : Capability -> Id -> Capability -> Capability
+
+` x [ y := M ] with x ≟ y
+... | yes _        = M
+... | no _         = ` x
+(N ∙ R) [ y := M ] = N [ y := M ] ∙ R [ y := M ]
+C [ _ := _ ]       = C
+
+-- Tests corner
+
+_ : ` "a" [ "a" := Open "b" ] ≡ Open "b"
+_ = refl
+
+_ : ` "b" [ "a" := Open "b" ] ≡ ` "b"
+_ = refl
+
+-- Process Definition ----------------------------------------------------------
+
+infix  40 _[_/_]
+infixr 30 Fun_∙_
+infix  20 _[_]
+infixr 10 _||_
+
 data Process : Set where
   ν_∙_   : Id → Process → Process                 -- Restriction
-  Stop   : Process                                -- Inactivity
+  Zero   : Process                                -- Inactivity
   _||_   : Process → Process → Process            -- Composition
   !_     : Process -> Process                     -- Replication
   _[_]   : Capability → Process → Process         -- Ambient
@@ -38,29 +57,11 @@ data Process : Set where
   Fun_∙_ : Id -> Process → Process                -- Input Action
   <_>    : Capability → Process                   -- Message
 
--- Capability substitution
-
-_[_:=_] : Capability -> Id -> Capability -> Capability
-
-Var x [ y := M ] with x ≟ y
-... | yes _        = M
-... | no _         = Var x
-(N ∙ R) [ y := M ] = N [ y := M ] ∙ R [ y := M ]
-C [ _ := _ ]       = C
-
--- Tests corner
-
-_ : Var "a" [ "a" := Open "b" ] ≡ Open "b"
-_ = refl
-
-_ : ` "b" [ "a" := Open "b" ] ≡ ` "b"
-_ = refl
-
--- Process substitution
+-- Process substitution --------------------------------------------------------
 
 _[_/_] : Process -> Id -> Capability -> Process
 
-Stop [ _ / _ ]       = Stop
+Zero [ _ / _ ]       = Zero
 (P || Q) [ x / M ]   = P [ x / M ] || Q [ x / M ]
 (! P) [ x / M ]      = ! (P [ x / M ])
 (x [ P ]) [ y / M ]  = (x [ y := M ]) [ P [ y / M ] ]
@@ -75,13 +76,72 @@ Stop [ _ / _ ]       = Stop
 
 -- Tests corner
 
-_ : (` "a" [ < Var "b" > ]) [ "b" / Open "a" ] ≡ ` "a" [ < Open "a" > ]
+_ : (` "a" [ < ` "b" > ]) [ "b" / Open "a" ] ≡ ` "a" [ < Open "a" > ]
 _ = refl
 
-_ : (< ` "a" > || < Var "b" >) [ "b" / Open "a" ] ≡ < ` "a" > || < Open "a" >
+_ : (< ` "a" > || < ` "b" >) [ "b" / Open "a" ] ≡ < ` "a" > || < Open "a" >
 _ = refl
 
--- Reduction rules
+-- Congruence ------------------------------------------------------------------
+
+infix 5 _≡≡_
+
+data _≡≡_ : Process → Process → Set where
+  Struct_Refl    : ∀ {P} →
+                   P ≡≡ P
+
+  Struct_Symm    : ∀ {P Q} →
+                   P ≡≡ Q → Q ≡≡ P
+
+  Struct_Trans   : ∀ {P Q R} →
+                   P ≡≡ Q → Q ≡≡ R → P ≡≡ R
+
+  Struct_Res     : ∀ {n P Q} →
+                   P ≡≡ Q → ν n ∙ P ≡≡ ν n ∙ Q
+
+  Struct_Par     : ∀ {P Q R} →
+                   P ≡≡ Q → P || R ≡≡ Q || R
+
+  Struct_Repl    : ∀ {P Q} →
+                   P ≡≡ Q → ! P ≡≡ ! Q
+
+  Struct_Amb     : ∀ {M P Q} →
+                   P ≡≡ Q → M [ P ] ≡≡ M [ Q ]
+
+  Struct_Action  : ∀ {M P Q} →
+                   P ≡≡ Q → M ∙ P ≡≡ M ∙ Q
+
+  Struct_Input   : ∀ {x P Q} →
+                   P ≡≡ Q → Fun x ∙ P ≡≡ Fun x ∙ Q
+
+  Struct_Comm    : ∀ {P Q} →
+                   P ≡≡ Q → Q ≡≡ P
+
+  Struct_Assoc   : ∀ {P Q R} →
+                   (P || Q) || R ≡≡ P || (Q || R)
+
+  Struct_ResRes  : ∀ {n m P} →
+                   n ≢ m -> ν n ∙ ν m ∙ P ≡≡ ν m ∙ ν n ∙ P
+
+  -- Struct_ResPar : ∀ {n m P} → ??? -- Free variale computation missing
+
+  Struct_ResAmb  : ∀ {n m P} →
+                   n ≢ m -> ν n ∙ (` m [ P ]) ≡≡ ` m [ ν n ∙ P ]
+
+  Struct_ZeroPar : ∀ {P} →
+                   P || Zero ≡≡ P
+
+  Struct_ZeroRes : ∀ {n} →
+                   ν n ∙ Zero ≡≡ Zero
+
+  Struct_ZeroRep : ! Zero ≡≡ Zero
+
+  Struct_ε       : ε ∙ Zero ≡≡ Zero
+
+  Struct_∙       : ∀ {M M' P} →
+                   (M ∙ M') ∙ P ≡≡ M ∙ (M' ∙ P)
+
+-- Reduction rules -------------------------------------------------------------
 
 infix 5 _~>_
 
@@ -106,4 +166,24 @@ data _~>_ : Process → Process → Set where
               ~>
               P [ x / M ]
 
---- Congruence
+  Red_Par   : ∀ {P Q R} →
+              P ~> Q
+              →
+              P || R ~> Q || R
+
+  Red_Res   : ∀ {n P Q} →
+              P ~> Q
+              →
+              ν n ∙ P ~> ν n ∙ Q
+
+  Red_Amb  : ∀ {M P Q} →
+              P ~> Q
+              →
+              M [ P ] ~> M [ Q ]
+
+  Red_≡≡   : ∀ {P P' Q Q'} →
+             P' ≡≡ P → P ~> Q → Q' ≡≡ Q
+             →
+             P' ~> Q'
+
+--------------------------------------------------------------------------------
