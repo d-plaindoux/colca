@@ -182,7 +182,7 @@ data _~>_ : Process → Process → Set where
               M [ P ] ~> M [ Q ]
 
   Red_≡≡   : ∀ {P P' Q Q'} →
-             P' ≡≡ P → P ~> Q → Q' ≡≡ Q
+             P' ≡≡ P → P ~> Q → Q ≡≡ Q'
              →
              P' ~> Q'
 
