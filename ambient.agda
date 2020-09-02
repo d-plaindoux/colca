@@ -26,6 +26,23 @@ data Capability : Set where
   ε    : Capability                               -- Null
   _∙_  : Capability → Capability → Capability     -- Path
 
+-- Process Definition ----------------------------------------------------------
+
+infix  40 _[_/_]
+infixr 30 Fun_∙_
+infix  20 _[_]
+infixr 10 _||_
+
+data Process : Set where
+  ν_∙_   : Id → Process → Process                 -- Restriction
+  Zero   : Process                                -- Inactivity
+  _||_   : Process → Process → Process            -- Composition
+  !_     : Process -> Process                     -- Replication
+  _[_]   : Capability → Process → Process         -- Ambient
+  _∙_    : Capability → Process → Process         -- Action
+  Fun_∙_ : Id -> Process → Process                -- Input Action
+  <_>    : Capability → Process                   -- Message
+
 -- Capability substitution -----------------------------------------------------
 
 _[_:=_] : Capability -> Id -> Capability -> Capability
@@ -43,23 +60,6 @@ _ = refl
 
 _ : ` "b" [ "a" := Open "b" ] ≡≡ ` "b"
 _ = refl
-
--- Process Definition ----------------------------------------------------------
-
-infix  40 _[_/_]
-infixr 30 Fun_∙_
-infix  20 _[_]
-infixr 10 _||_
-
-data Process : Set where
-  ν_∙_   : Id → Process → Process                 -- Restriction
-  Zero   : Process                                -- Inactivity
-  _||_   : Process → Process → Process            -- Composition
-  !_     : Process -> Process                     -- Replication
-  _[_]   : Capability → Process → Process         -- Ambient
-  _∙_    : Capability → Process → Process         -- Action
-  Fun_∙_ : Id -> Process → Process                -- Input Action
-  <_>    : Capability → Process                   -- Message
 
 -- Process substitution --------------------------------------------------------
 
