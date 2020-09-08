@@ -2,6 +2,10 @@
 
 Mobile Ambient formalism transposed in Agda
 
+## Paper
+
+[Mobile Ambients](http://lucacardelli.name/Papers/MobileAmbients.A4.pdf) by Luca Cardelli and Andrew D. Gordon.
+
 # Why Colca?
 
 See [Colca](https://www.elfdict.com/w/colca?include_old=1) definition
