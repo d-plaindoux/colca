@@ -1,0 +1,6 @@
+### Agda ###
+*.agdai
+
+### Idea ###
+*.iml
+.idea
