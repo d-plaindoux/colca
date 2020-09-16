@@ -181,14 +181,14 @@ data _~>_ : Process → Process → Set where
               →
               ν n ∙ P ~> ν n ∙ Q
 
-  Red_Amb  : ∀ {M P Q} →
+  Red_Amb   : ∀ {M P Q} →
               P ~> Q
               →
               M [ P ] ~> M [ Q ]
 
-  Red_≡   : ∀ {P P' Q Q'} →
-             P' ≡ P → P ~> Q → Q ≡ Q'
-             →
-             P' ~> Q'
+  Red_≡     : ∀ {P P' Q Q'} →
+              P' ≡ P → P ~> Q → Q ≡ Q'
+              →
+              P' ~> Q'
 
 --------------------------------------------------------------------------------
