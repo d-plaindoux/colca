@@ -2,6 +2,20 @@
 
 Mobile Ambient formalism transposed in Agda
 
+## Implementation
+
+- [X] Capability definition
+- [X] Capability free variables
+- [X] Process definition
+- [X] Process free variables
+- [X] Process congruence
+- [X] Process reduction
+- [ ] Ambient exhibition
+- [ ] Contextual equivalence
+- [X] π-calculus definition
+- [ ] Encoding of the Asynchronous π-calculus
+- [ ] Lemma (Substitution)
+ 
 ## Paper
 
 [Mobile Ambients](http://lucacardelli.name/Papers/MobileAmbients.A4.pdf) by Luca Cardelli and Andrew D. Gordon.
