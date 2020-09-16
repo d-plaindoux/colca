@@ -2,12 +2,19 @@ module Ambient where
 
 open import Relation.Nullary
      using (yes; no)
+
 open import Data.String
      using (String; _≟_)
 
 open import Relation.Binary.PropositionalEquality
      using (_≢_; refl)
      renaming (_≡_ to _≡≡_)
+
+open import Data.List
+     using (List; []; _::_; _++_; filter)
+
+open import  Data.List.Membership.Setoid
+     using (_∉_)
 
 -- Local modules ---------------------------------------------------------------
 
@@ -16,7 +23,7 @@ open import Common
 
 open import Capability
      using (Capability; `_; In; Out; Open; ε; _∙_)
-     renaming (_[_/_] to _[_:=_])
+     renaming (_[_/_] to _[_:=_]; fv to fv-capa)
 
 -- Process Definition ----------------------------------------------------------
 
@@ -34,6 +41,25 @@ data Process : Set where
   _∙_    : Capability → Process → Process         -- Action
   Fun_∙_ : Id -> Process → Process                -- Input Action
   <_>    : Capability → Process                   -- Message
+
+-- Free variable ---------------------------------------------------------------
+
+-- Temporary / Should be replaced by a call to filter
+_-_ : List Id -> Id -> List Id
+[] - _      = []
+(x :: xs) - y with x ≟ y
+... | yes _ = xs - y
+... | no _  = x :: (xs - y)
+
+fv : Process -> List Id
+fv (ν x ∙ P)   = fv P
+fv Zero        = []
+fv (P || Q)    = (fv P) ++ (fv Q)
+fv (! P)       = fv P
+fv (M [ P ])   = (fv-capa M) ++ (fv P)
+fv (M ∙ P)     = (fv-capa M) ++ (fv P)
+fv (Fun x ∙ P) = (fv P) - x
+fv (< M >)     = fv-capa M
 
 -- Process substitution --------------------------------------------------------
 
@@ -101,7 +127,8 @@ data _≡_ : Process → Process → Set where
   Struct_ResRes  : ∀ {n m P} →
                    n ≢ m -> ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
 
-  -- Struct_ResPar : ∀ {n m P} → ??? -- Free variale computation missing
+  Struct_ResPar  : ∀ {n m P} →
+                   n ∉ fv(P) → ν n ∙ (P || Q) ≡ P ||  ν n ∙ Q
 
   Struct_ResAmb  : ∀ {n m P} →
                    n ≢ m -> ν n ∙ (` m [ P ]) ≡ ` m [ ν n ∙ P ]

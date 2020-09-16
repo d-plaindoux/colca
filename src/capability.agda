@@ -3,6 +3,9 @@ module Capability where
 open import Relation.Nullary
      using (yes; no)
 
+open import Data.List
+     using (List; []; [_]; _++_)
+
 open import Data.String
      using (String; _≟_)
 
@@ -27,20 +30,27 @@ data Capability : Set where
   ε    : Capability                               -- Null
   _∙_  : Capability → Capability → Capability     -- Path
 
+-- Free variable ---------------------------------------------------------------
+
+fv : Capability -> List Id
+fv (` a)    = [ a ]
+fv (a ∙ b)  = (fv a) ++ (fv b)
+fv _        = []
+
 -- Capability substitution -----------------------------------------------------
 
 _[_/_] : Capability -> Id -> Capability -> Capability
 
 ` x [ y / M ] with x ≟ y
-... | yes _        = M
-... | no _         = ` x
+... | yes _       = M
+... | no _        = ` x
 (N ∙ R) [ y / M ] = N [ y / M ] ∙ R [ y / M ]
 C [ _ / _ ]       = C
 
 -- Tests corner
 
-_ : ` "a" [ "a" / Open "b" ] ≡≡ Open "b"
+_ : ∀ {M} → ` "a" [ "a" / M ] ≡≡ M
 _ = refl
 
-_ : ` "b" [ "a" / Open "b" ] ≡≡ ` "b"
+_ : ∀ {M} → ` "b" [ "a" / M ] ≡≡ ` "b"
 _ = refl
