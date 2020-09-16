@@ -91,59 +91,59 @@ _ = refl
 infix 5 _≡_
 
 data _≡_ : Process → Process → Set where
-  Struct_Refl    : ∀ {P} →
+  Struct-Refl    : ∀ {P} →
                    P ≡ P
 
-  Struct_Symm    : ∀ {P Q} →
+  Struct-Symm    : ∀ {P Q} →
                    P ≡ Q → Q ≡ P
 
-  Struct_Trans   : ∀ {P Q R} →
+  Struct-Trans   : ∀ {P Q R} →
                    P ≡ Q → Q ≡ R → P ≡ R
 
-  Struct_Res     : ∀ {n P Q} →
+  Struct-Res     : ∀ {n P Q} →
                    P ≡ Q → ν n ∙ P ≡ ν n ∙ Q
 
-  Struct_Par     : ∀ {P Q R} →
+  Struct-Par     : ∀ {P Q R} →
                    P ≡ Q → P || R ≡ Q || R
 
-  Struct_Repl    : ∀ {P Q} →
+  Struct-Repl    : ∀ {P Q} →
                    P ≡ Q → ! P ≡ ! Q
 
-  Struct_Amb     : ∀ {M P Q} →
+  Struct-Amb     : ∀ {M P Q} →
                    P ≡ Q → M [ P ] ≡ M [ Q ]
 
-  Struct_Action  : ∀ {M P Q} →
+  Struct-Action  : ∀ {M P Q} →
                    P ≡ Q → M ∙ P ≡ M ∙ Q
 
-  Struct_Input   : ∀ {x P Q} →
+  Struct-Input   : ∀ {x P Q} →
                    P ≡ Q → Fun x ∙ P ≡ Fun x ∙ Q
 
-  Struct_Comm    : ∀ {P Q} →
+  Struct-Comm    : ∀ {P Q} →
                    P ≡ Q → Q ≡ P
 
-  Struct_Assoc   : ∀ {P Q R} →
+  Struct-Assoc   : ∀ {P Q R} →
                    (P || Q) || R ≡ P || (Q || R)
 
-  Struct_ResRes  : ∀ {n m P} →
+  Struct-ResRes  : ∀ {n m P} →
                    n ≢ m -> ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
 
-  Struct_ResPar  : ∀ {n m P} →
+  Struct-ResPar  : ∀ {n m P} →
                    n ∉ fv(P) → ν n ∙ (P || Q) ≡ P ||  ν n ∙ Q
 
-  Struct_ResAmb  : ∀ {n m P} →
+  Struct-ResAmb  : ∀ {n m P} →
                    n ≢ m -> ν n ∙ (` m [ P ]) ≡ ` m [ ν n ∙ P ]
 
-  Struct_ZeroPar : ∀ {P} →
+  Struct-ZeroPar : ∀ {P} →
                    P || Zero ≡ P
 
-  Struct_ZeroRes : ∀ {n} →
+  Struct-ZeroRes : ∀ {n} →
                    ν n ∙ Zero ≡ Zero
 
-  Struct_ZeroRep : ! Zero ≡ Zero
+  Struct-ZeroRep : ! Zero ≡ Zero
 
-  Struct_ε       : ε ∙ Zero ≡ Zero
+  Struct-ε       : ε ∙ Zero ≡ Zero
 
-  Struct_∙       : ∀ {M M' P} →
+  Struct-∙       : ∀ {M M' P} →
                    (M ∙ M') ∙ P ≡ M ∙ (M' ∙ P)
 
 -- Reduction rules -------------------------------------------------------------
@@ -151,42 +151,42 @@ data _≡_ : Process → Process → Set where
 infix 5 _~>_
 
 data _~>_ : Process → Process → Set where
-  Red_In    : ∀ {m n P Q R} →
+  Red-In    : ∀ {m n P Q R} →
               ` m [ In n ∙ P || Q ] || ` n [ R ]
               ~>
               ` n [ ` m [ P || Q ] || R ]
 
-  Red_Out   : ∀ {m n P Q R} →
+  Red-Out   : ∀ {m n P Q R} →
               ` m [ ` n [ Out m ∙ P || R ] || Q ]
               ~>
              ` m [ Q ] || ` n [ P || R ]
 
-  Red_Open  : ∀ {m P Q} →
+  Red-Open  : ∀ {m P Q} →
               ` m [ P ] || Open m ∙ Q
               ~>
               P || Q
 
-  Red_I/O   : ∀ {M x P} →
+  Red-I/O   : ∀ {M x P} →
               < M > || Fun x ∙ P
               ~>
               P [ x / M ]
 
-  Red_Par   : ∀ {P Q R} →
+  Red-Par   : ∀ {P Q R} →
               P ~> Q
               →
               P || R ~> Q || R
 
-  Red_Res   : ∀ {n P Q} →
+  Red-Res   : ∀ {n P Q} →
               P ~> Q
               →
               ν n ∙ P ~> ν n ∙ Q
 
-  Red_Amb   : ∀ {M P Q} →
+  Red-Amb   : ∀ {M P Q} →
               P ~> Q
               →
               M [ P ] ~> M [ Q ]
 
-  Red_≡     : ∀ {P P' Q Q'} →
+  Red-≡     : ∀ {P P' Q Q'} →
               P' ≡ P → P ~> Q → Q ≡ Q'
               →
               P' ~> Q'
