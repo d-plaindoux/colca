@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality
      renaming (_≡_ to _≡≡_)
 
 open import Data.List
-     using (List; []; _::_; _++_; filter)
+     using (List; []; _∷_; _++_; filter)
 
 open import  Data.List.Membership.Setoid
      using (_∉_)
@@ -36,22 +36,22 @@ data Process : Set where
   ν_∙_   : Id → Process → Process                 -- Restriction
   Zero   : Process                                -- Inactivity
   _||_   : Process → Process → Process            -- Composition
-  !_     : Process -> Process                     -- Replication
+  !_     : Process → Process                     -- Replication
   _[_]   : Capability → Process → Process         -- Ambient
   _∙_    : Capability → Process → Process         -- Action
-  Fun_∙_ : Id -> Process → Process                -- Input Action
+  Fun_∙_ : Id → Process → Process                -- Input Action
   <_>    : Capability → Process                   -- Message
 
 -- Free variable ---------------------------------------------------------------
 
 -- Temporary / Should be replaced by a call to filter
-_-_ : List Id -> Id -> List Id
+_-_ : List Id → Id → List Id
 [] - _      = []
-(x :: xs) - y with x ≟ y
+(x ∷ xs) - y with x ≟ y
 ... | yes _ = xs - y
-... | no _  = x :: (xs - y)
+... | no _  = x ∷ (xs - y)
 
-fv : Process -> List Id
+fv : Process → List Id
 fv (ν x ∙ P)   = fv P
 fv Zero        = []
 fv (P || Q)    = (fv P) ++ (fv Q)
@@ -63,7 +63,7 @@ fv (< M >)     = fv-capa M
 
 -- Process substitution --------------------------------------------------------
 
-_[_/_] : Process -> Id -> Capability -> Process
+_[_/_] : Process → Id → Capability → Process
 
 Zero [ _ / _ ]       = Zero
 (P || Q) [ x / M ]   = P [ x / M ] || Q [ x / M ]
@@ -125,13 +125,13 @@ data _≡_ : Process → Process → Set where
                    (P || Q) || R ≡ P || (Q || R)
 
   Struct-ResRes  : ∀ {n m P} →
-                   n ≢ m -> ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
+                   n ≢ m → ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
 
-  Struct-ResPar  : ∀ {n m P} →
-                   n ∉ fv(P) → ν n ∙ (P || Q) ≡ P ||  ν n ∙ Q
+  Struct-ResPar  : ∀ {n P Q} →
+                   ν n ∙ (P || Q) ≡ P || ν n ∙ Q -- n ∉ fv(P) →
 
   Struct-ResAmb  : ∀ {n m P} →
-                   n ≢ m -> ν n ∙ (` m [ P ]) ≡ ` m [ ν n ∙ P ]
+                   n ≢ m → ν n ∙ (` m [ P ]) ≡ ` m [ ν n ∙ P ]
 
   Struct-ZeroPar : ∀ {P} →
                    P || Zero ≡ P
