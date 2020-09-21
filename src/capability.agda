@@ -4,13 +4,13 @@ open import Relation.Nullary
      using (yes; no)
 
 open import Data.List
-     using (List; []; [_]; _++_)
+     using (List; []; [_]; _∷_; _++_)
 
 open import Data.String
      using (String; _≟_)
 
 open import Relation.Binary.PropositionalEquality
-     using (_≢_; refl) renaming (_≡_ to _≡≡_)
+     using (_≢_; refl; _≡_)
 
 -- Local modules ---------------------------------------------------------------
 
@@ -47,10 +47,18 @@ _[_/_] : Capability -> Id -> Capability -> Capability
 (N ∙ R) [ y / M ] = N [ y / M ] ∙ R [ y / M ]
 C [ _ / _ ]       = C
 
--- Tests corner
+module Test where
+  a = "a"
+  b = "b"
 
-_ : ∀ {M} → ` "a" [ "a" / M ] ≡≡ M
-_ = refl
+  _ : ∀ {M} → ` a [ a / M ] ≡ M
+  _ = refl
 
-_ : ∀ {M} → ` "b" [ "a" / M ] ≡≡ ` "b"
-_ = refl
+  _ : ∀ {M} → ` b [ a / M ] ≡ ` b
+  _ = refl
+
+  _ : fv (` a) ≡ [ a ]
+  _ = refl
+
+  _ : fv (` a ∙ ` b) ≡ a ∷ b ∷ []
+  _ = refl

@@ -36,10 +36,10 @@ data Process : Set where
   ν_∙_   : Id → Process → Process                 -- Restriction
   Zero   : Process                                -- Inactivity
   _||_   : Process → Process → Process            -- Composition
-  !_     : Process → Process                     -- Replication
+  !_     : Process → Process                      -- Replication
   _[_]   : Capability → Process → Process         -- Ambient
   _∙_    : Capability → Process → Process         -- Action
-  Fun_∙_ : Id → Process → Process                -- Input Action
+  Fun_∙_ : Id → Process → Process                 -- Input Action
   <_>    : Capability → Process                   -- Message
 
 -- Free variable ---------------------------------------------------------------
@@ -78,13 +78,15 @@ Zero [ _ / _ ]       = Zero
 ... | no _           = Fun x ∙ (P [ y / M ])
 ( N ∙ P) [ x / M ]   = (N [ x := M ]) ∙ (P [ x / M ])
 
--- Tests corner
+module Test where
+  a = "a"
+  b = "b"
 
-_ : (` "a" [ < ` "b" > ]) [ "b" / Open "a" ] ≡≡ ` "a" [ < Open "a" > ]
-_ = refl
+  _ : (` a [ < ` b > ]) [ b / Open a ] ≡≡ ` a [ < Open a > ]
+  _ = refl
 
-_ : (< ` "a" > || < ` "b" >) [ "b" / Open "a" ] ≡≡ < ` "a" > || < Open "a" >
-_ = refl
+  _ : (< ` a > || < ` b >) [ b / Open a ] ≡≡ < ` a > || < Open a >
+  _ = refl
 
 -- Congruence ------------------------------------------------------------------
 
