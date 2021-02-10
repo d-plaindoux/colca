@@ -32,10 +32,10 @@ data Capability : Set where
 
 -- Free variable ---------------------------------------------------------------
 
-fv : Capability -> List Id
-fv (` a)    = [ a ]
-fv (a ∙ b)  = (fv a) ++ (fv b)
-fv _        = []
+freeVar : Capability -> List Id
+freeVar (` a)    = [ a ]
+freeVar (a ∙ b)  = (freeVar a) ++ (freeVar b)
+freeVar _        = []
 
 -- Capability substitution -----------------------------------------------------
 
@@ -51,14 +51,19 @@ module Test where
   a = "a"
   b = "b"
 
+  ------------------------------------------------------------------------------
+
+  _ : freeVar (` a) ≡ [ a ]
+  _ = refl
+
+  _ : freeVar (` a ∙ ` b) ≡ a ∷ b ∷ []
+  _ = refl
+
+  ------------------------------------------------------------------------------
+
   _ : ∀ {M} → ` a [ a / M ] ≡ M
   _ = refl
 
   _ : ∀ {M} → ` b [ a / M ] ≡ ` b
   _ = refl
 
-  _ : fv (` a) ≡ [ a ]
-  _ = refl
-
-  _ : fv (` a ∙ ` b) ≡ a ∷ b ∷ []
-  _ = refl

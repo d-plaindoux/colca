@@ -23,7 +23,7 @@ open import Common
 
 open import Capability
      using (Capability; `_; In; Out; Open; ε; _∙_)
-     renaming (_[_/_] to _[_:=_]; fv to fv-capa)
+     renaming (_[_/_] to _[_/_]-capa; freeVar to freeVar-capa)
 
 -- Process Definition ----------------------------------------------------------
 
@@ -50,15 +50,15 @@ _-_ : List Id → Id → List Id
 ... | yes _ = xs - y
 ... | no _  = x ∷ (xs - y)
 
-fv : Process → List Id
-fv (ν x ∙ P)   = fv P
-fv Zero        = []
-fv (P || Q)    = (fv P) ++ (fv Q)
-fv (! P)       = fv P
-fv (M [ P ])   = (fv-capa M) ++ (fv P)
-fv (M ∙ P)     = (fv-capa M) ++ (fv P)
-fv (Fun x ∙ P) = (fv P) - x
-fv (< M >)     = fv-capa M
+freeVar : Process → List Id
+freeVar (ν x ∙ P)   = freeVar P
+freeVar Zero        = []
+freeVar (P || Q)    = (freeVar P) ++ (freeVar Q)
+freeVar (! P)       = freeVar P
+freeVar (M [ P ])   = (freeVar-capa M) ++ (freeVar P)
+freeVar (M ∙ P)     = (freeVar-capa M) ++ (freeVar P)
+freeVar (Fun x ∙ P) = (freeVar P) - x
+freeVar (< M >)     = freeVar-capa M
 
 _∉_ : Id → List Id → Set
 y ∉ l = member y l ≡≡ false
@@ -75,19 +75,21 @@ _[_/_] : Process → Id → Capability → Process
 Zero [ _ / _ ]       = Zero
 (P || Q) [ x / M ]   = P [ x / M ] || Q [ x / M ]
 (! P) [ x / M ]      = ! (P [ x / M ])
-(x [ P ]) [ y / M ]  = (x [ y := M ]) [ P [ y / M ] ]
+(x [ P ]) [ y / M ]  = (x [ y / M ]-capa) [ P [ y / M ] ]
 (ν x ∙ P) [ y / M ] with x ≟ y
 ... | yes _          = ν x ∙ P
 ... | no _           = ν x ∙ (P [ y / M ])
-< N > [ x / M ]      = < N [ x := M ] >
+< N > [ x / M ]      = < N [ x / M ]-capa >
 (Fun x ∙ P) [ y / M ] with x ≟ y
 ... | yes _          = Fun x ∙ P
 ... | no _           = Fun x ∙ (P [ y / M ])
-( N ∙ P) [ x / M ]   = (N [ x := M ]) ∙ (P [ x / M ])
+( N ∙ P) [ x / M ]   = (N [ x / M ]-capa) ∙ (P [ x / M ])
 
 module Test where
   a = "a"
   b = "b"
+
+  ------------------------------------------------------------------------------
 
   _ : (` a [ < ` b > ]) [ b / Open a ] ≡≡ ` a [ < Open a > ]
   _ = refl
@@ -159,7 +161,7 @@ data _≡_ : Process → Process → Set where
                  → ν n ∙ ν m ∙ P ≡ ν m ∙ ν n ∙ P
 
   Struct-ResPar  : ∀ {n P Q}
-                 → n ∉ fv(P)
+                 → n ∉ freeVar(P)
                    -----------------------------
                  → ν n ∙ (P || Q) ≡ P || ν n ∙ Q
 
