@@ -28,7 +28,7 @@ open import Capability
 -- Process Definition ----------------------------------------------------------
 
 infix  40 _[_/_]
-infixr 30 Fun_∙_
+infixr 30 Λ_∙_
 infix  20 _[_]
 infixr 10 _||_
 
@@ -39,7 +39,7 @@ data Process : Set where
   !_     : Process → Process                      -- Replication
   _[_]   : Capability → Process → Process         -- Ambient
   _∙_    : Capability → Process → Process         -- Action
-  Fun_∙_ : Id → Process → Process                 -- Input Action
+  Λ_∙_ : Id → Process → Process                 -- Input Action
   <_>    : Capability → Process                   -- Message
 
 -- Free variable ---------------------------------------------------------------
@@ -57,7 +57,7 @@ freeVar (P || Q)    = (freeVar P) ++ (freeVar Q)
 freeVar (! P)       = freeVar P
 freeVar (M [ P ])   = (freeVar-capa M) ++ (freeVar P)
 freeVar (M ∙ P)     = (freeVar-capa M) ++ (freeVar P)
-freeVar (Fun x ∙ P) = (freeVar P) - x
+freeVar (Λ x ∙ P) = (freeVar P) - x
 freeVar (< M >)     = freeVar-capa M
 
 _∉_ : Id → List Id → Set
@@ -80,9 +80,9 @@ Zero [ _ / _ ]       = Zero
 ... | yes _          = ν x ∙ P
 ... | no _           = ν x ∙ (P [ y / M ])
 < N > [ x / M ]      = < N [ x / M ]-capa >
-(Fun x ∙ P) [ y / M ] with x ≟ y
-... | yes _          = Fun x ∙ P
-... | no _           = Fun x ∙ (P [ y / M ])
+(Λ x ∙ P) [ y / M ] with x ≟ y
+... | yes _          = Λ x ∙ P
+... | no _           = Λ x ∙ (P [ y / M ])
 ( N ∙ P) [ x / M ]   = (N [ x / M ]-capa) ∙ (P [ x / M ])
 
 module Test where
@@ -144,7 +144,7 @@ data _≡_ : Process → Process → Set where
   Struct-Input   : ∀ {x P Q}
                  → P ≡ Q
                    ---------------------
-                 → Fun x ∙ P ≡ Fun x ∙ Q
+                 → Λ x ∙ P ≡ Λ x ∙ Q
 
   Struct-Comm    : ∀ {P Q}
                  → P ≡ Q
@@ -206,7 +206,7 @@ data _~>_ : Process → Process → Set where
 
   Red-I/O   : ∀ {M x P}
               ---------------------------------
-            → < M > || Fun x ∙ P ~> P [ x / M ]
+            → < M > || Λ x ∙ P ~> P [ x / M ]
 
   Red-Par   : ∀ {P Q R}
             → P ~> Q
