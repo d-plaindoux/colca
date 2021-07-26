@@ -52,7 +52,7 @@ module V2 where
     This second version introduces the expression as constraint in the type definition.
     This prevents incomplete pattern matching for peek and pop.
 
-    For this purpose we first design empty? predicate and then we use it the type definition
+    For this purpose we first design empty? predicate and then we use it in the type definition
     of peek and pop.
     -}
 
@@ -88,7 +88,7 @@ module V2 where
 
 module V3 where
     {-
-    In this third version we use an GADT for the Stack data representation.
+    In this third version we use a GADT for the Stack data representation.
     A Kind then is design on purpose and a phantom type is used for the
     association between the stack and the kind.
     -}
@@ -166,7 +166,7 @@ module V4 where
 module V5 where
     {-
     In this last version we show that previous Kind definiton is isomorphic
-    with the natural.
+    with the Natural.
     -}
 
     data Stack (A : Set) : ℕ → Set where
