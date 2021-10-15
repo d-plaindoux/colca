@@ -51,14 +51,14 @@ _-_ : List Id → Id → List Id
 ... | no _  = x ∷ (xs - y)
 
 freeVar : Process → List Id
-freeVar (ν x ∙ P)   = freeVar P
-freeVar Zero        = []
-freeVar (P || Q)    = (freeVar P) ++ (freeVar Q)
-freeVar (! P)       = freeVar P
-freeVar (M [ P ])   = (freeVar-capa M) ++ (freeVar P)
-freeVar (M ∙ P)     = (freeVar-capa M) ++ (freeVar P)
+freeVar (ν x ∙ P) = freeVar P
+freeVar Zero      = []
+freeVar (P || Q)  = (freeVar P) ++ (freeVar Q)
+freeVar (! P)     = freeVar P
+freeVar (M [ P ]) = (freeVar-capa M) ++ (freeVar P)
+freeVar (M ∙ P)   = (freeVar-capa M) ++ (freeVar P)
 freeVar (Λ x ∙ P) = (freeVar P) - x
-freeVar (< M >)     = freeVar-capa M
+freeVar (< M >)   = freeVar-capa M
 
 _∉_ : Id → List Id → Set
 y ∉ l = member y l ≡≡ false
